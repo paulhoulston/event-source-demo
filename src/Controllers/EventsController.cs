@@ -19,6 +19,72 @@ namespace EventSourcingDemo.Controllers
             _subscriberService = subscriberService;
         }
 
+        // Endpoint for ApplicationReceived event
+        [HttpPost("apply")]
+        public ActionResult<Event> ApplyForMortgage([FromBody] string streamId)
+        {
+            if (string.IsNullOrWhiteSpace(streamId))
+            {
+                return BadRequest("StreamId (Mortgage Id) is required.");
+            }
+
+            var newEvent = new Event
+            {
+                StreamId = streamId,
+                Name = "ApplicationReceived",
+                Timestamp = DateTime.UtcNow
+            };
+
+            _eventStore.AddEvent(newEvent);
+            _subscriberService.NotifySubscribers(newEvent);
+
+            return CreatedAtAction(nameof(ApplyForMortgage), new { id = newEvent.Id }, newEvent);
+        }
+
+        // Endpoint for ApplicationDecided event
+        [HttpPost("decide")]
+        public ActionResult<Event> DecideApplication([FromBody] string streamId)
+        {
+            if (string.IsNullOrWhiteSpace(streamId))
+            {
+                return BadRequest("StreamId (Mortgage Id) is required.");
+            }
+
+            var newEvent = new Event
+            {
+                StreamId = streamId,
+                Name = "ApplicationDecided",
+                Timestamp = DateTime.UtcNow
+            };
+
+            _eventStore.AddEvent(newEvent);
+            _subscriberService.NotifySubscribers(newEvent);
+
+            return CreatedAtAction(nameof(DecideApplication), new { id = newEvent.Id }, newEvent);
+        }
+
+        // Endpoint for FundsReleased event
+        [HttpPost("complete")]
+        public ActionResult<Event> CompleteMortgage([FromBody] string streamId)
+        {
+            if (string.IsNullOrWhiteSpace(streamId))
+            {
+                return BadRequest("StreamId (Mortgage Id) is required.");
+            }
+
+            var newEvent = new Event
+            {
+                StreamId = streamId,
+                Name = "FundsReleased",
+                Timestamp = DateTime.UtcNow
+            };
+
+            _eventStore.AddEvent(newEvent);
+            _subscriberService.NotifySubscribers(newEvent);
+
+            return CreatedAtAction(nameof(CompleteMortgage), new { id = newEvent.Id }, newEvent);
+        }
+
         [HttpPost("publish")]
         public ActionResult<Event> PublishEvent([FromBody] Event newEvent)
         {

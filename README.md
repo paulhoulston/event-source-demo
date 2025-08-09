@@ -1,90 +1,139 @@
-# Event Sourcing Demo
+# Event Source Demo
 
-This project demonstrates the concept of event sourcing in a .NET Core application. It allows users to publish events and manage subscribers effectively.
-
-## Project Structure
-
-The project is organized as follows:
-
-```
-event-sourcing-demo
-├── src
-│   ├── EventSourcingDemo
-│   │   ├── Models
-│   │   │   └── Event.cs          # Defines the Event class with properties Id, Name, and Timestamp.
-│   │   ├── Controllers
-│   │   │   └── EventsController.cs # Exports the EventsController class for publishing events and managing subscribers.
-│   │   ├── Services
-│   │   │   ├── EventStore.cs      # Manages the storage of events.
-│   │   │   └── SubscriberService.cs # Manages event subscribers.
-│   │   ├── Program.cs             # Entry point of the application.
-│   │   └── Startup.cs             # Configures services and the application's request pipeline.
-├── EventSourcingDemo.sln           # Solution file for the .NET Core application.
-└── README.md                       # Documentation for the project.
-```
+This project demonstrates event sourcing concepts using a simple mortgage lifecycle example.
 
 ## Getting Started
 
-To set up and run the application, follow these steps:
+### Prerequisites
 
-1. **Clone the repository**:
-   ```
-   git clone <repository-url>
-   cd event-sourcing-demo
+- [.NET 7 SDK or later](https://dotnet.microsoft.com/download)
+- [Git](https://git-scm.com/)
+- (Optional) [Postman](https://www.postman.com/) or `curl` for testing API endpoints
+
+### Setup
+
+1. **Clone the repository:**
+   ```sh
+   git clone https://github.com/your-username/event-source-demo.git
+   cd event-source-demo
    ```
 
-2. **Navigate to the project directory**:
-   ```
-   cd src/EventSourcingDemo
-   ```
-
-3. **Restore dependencies**:
-   ```
+2. **Restore dependencies:**
+   ```sh
    dotnet restore
    ```
 
-4. **Run the application**:
+3. **Build the project:**
+   ```sh
+   dotnet build
    ```
-   dotnet run --project EventSourcingDemo.csproj
+
+4. **Run the application:**
+   ```sh
+   dotnet run --project src
    ```
+   The API will start (by default on `https://localhost:5001` or `http://localhost:5000`).
 
-## Usage
+---
 
-### Publishing Events
+## Mortgage Event Lifecycle
 
-To publish a new event, use the following `curl` command:
+A mortgage in this demo follows a simplified lifecycle, represented by three main events:
 
-```sh
-curl -X POST "http://localhost:5000/api/events/publish" \
-     -H "Content-Type: application/json" \
-     -d '{"name": "MyEvent"}'
+1. **ApplicationReceived** (`apply`)  
+   The mortgage application is received.
+
+2. **ApplicationDecided** (`decide`)  
+   A decision is made on the mortgage application.
+
+3. **FundsReleased** (`complete`)  
+   The mortgage is completed and funds are released.
+
+Each event is associated with a `StreamId`, which represents a unique mortgage entity. All events for a mortgage are grouped by this `StreamId`.
+
+---
+
+## API Usage
+
+### 1. Apply for a Mortgage
+
+```http
+POST /api/events/apply
+Content-Type: application/json
+
+"your-mortgage-id"
 ```
 
-### Managing Subscribers
+Creates an `ApplicationReceived` event for the given mortgage.
 
-To add a new subscriber, use:
+---
 
-```sh
-curl -X POST "http://localhost:5000/api/events/subscribe" \
-     -H "Content-Type: application/json" \
-     -d '"http://subscriber-url/callback"'
+### 2. Decide on a Mortgage Application
+
+```http
+POST /api/events/decide
+Content-Type: application/json
+
+"your-mortgage-id"
 ```
 
-### Retrieving All Events
+Creates an `ApplicationDecided` event for the given mortgage.
 
-To get all published events:
+---
 
-```sh
-curl "http://localhost:5000/api/events"
+### 3. Complete the Mortgage
+
+```http
+POST /api/events/complete
+Content-Type: application/json
+
+"your-mortgage-id"
 ```
 
-> **Note:**  
-> If your app is running on a different port or using HTTPS, adjust the URLs accordingly.
+Creates a `FundsReleased` event for the given mortgage.
 
-## Contributing
+---
 
-Contributions are welcome! Please feel free to submit a pull request or open an issue for any suggestions or improvements.
+### 4. Get All Events
 
-## License
+```http
+GET /api/events
+```
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+Returns a list of all events.
+
+---
+
+### 5. Subscribe to Events
+
+You can subscribe an external service to receive notifications when new events are published.
+
+```http
+POST /api/events/subscribe
+Content-Type: application/json
+
+"https://your-subscriber-endpoint.com/api/receive"
+```
+
+Replace the URL in the body with your subscriber endpoint. The service will POST event data to this URL whenever a new event occurs.
+
+---
+
+## Event Structure
+
+Each event has the following structure:
+
+```json
+{
+  "id": 1,
+  "streamId": "your-mortgage-id",
+  "name": "ApplicationReceived | ApplicationDecided | FundsReleased",
+  "timestamp": "2025-08-09T12:00:00Z"
+}
+```
+
+---
+
+## Summary
+
+This demo shows how event sourcing can be used to track the lifecycle of a mortgage by recording each significant event in the process. Events are grouped by `StreamId` to represent the history of each mortgage.

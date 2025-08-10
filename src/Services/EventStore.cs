@@ -13,6 +13,7 @@ namespace EventSourcingDemo.Services
 
         public void AddEvent(Event eventItem)
         {
+            Console.WriteLine($"Adding event: {eventItem.Name} for StreamId: {eventItem.StreamId}");
             _events.Add(eventItem);
         }
 

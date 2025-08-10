@@ -32,7 +32,7 @@ This project demonstrates event sourcing concepts using a simple mortgage lifecy
    ```sh
    dotnet run --project src
    ```
-   The API will start (by default on `https://localhost:5001` or `http://localhost:5000`).
+   The API will start (by default on `http://localhost:5000` or `http://localhost:5000`).
 
 ---
 
@@ -53,15 +53,14 @@ Each event is associated with a `StreamId`, which represents a unique mortgage e
 
 ---
 
-## API Usage
+## API Usage (with `curl`)
 
 ### 1. Apply for a Mortgage
 
-```http
-POST /api/events/apply
-Content-Type: application/json
-
-"your-mortgage-id"
+```sh
+curl -X POST http://localhost:5000/api/events/apply \
+  -H "Content-Type: application/json" \
+  -d "\"your-mortgage-id\""
 ```
 
 Creates an `ApplicationReceived` event for the given mortgage.
@@ -70,11 +69,10 @@ Creates an `ApplicationReceived` event for the given mortgage.
 
 ### 2. Decide on a Mortgage Application
 
-```http
-POST /api/events/decide
-Content-Type: application/json
-
-"your-mortgage-id"
+```sh
+curl -X POST http://localhost:5000/api/events/decide \
+  -H "Content-Type: application/json" \
+  -d "\"your-mortgage-id\""
 ```
 
 Creates an `ApplicationDecided` event for the given mortgage.
@@ -83,11 +81,10 @@ Creates an `ApplicationDecided` event for the given mortgage.
 
 ### 3. Complete the Mortgage
 
-```http
-POST /api/events/complete
-Content-Type: application/json
-
-"your-mortgage-id"
+```sh
+curl -X POST http://localhost:5000/api/events/complete \
+  -H "Content-Type: application/json" \
+  -d "\"your-mortgage-id\""
 ```
 
 Creates a `FundsReleased` event for the given mortgage.
@@ -96,8 +93,8 @@ Creates a `FundsReleased` event for the given mortgage.
 
 ### 4. Get All Events
 
-```http
-GET /api/events
+```sh
+curl http://localhost:5000/api/events
 ```
 
 Returns a list of all events.
@@ -108,14 +105,19 @@ Returns a list of all events.
 
 You can subscribe an external service to receive notifications when new events are published.
 
-```http
-POST /api/events/subscribe
-Content-Type: application/json
-
-"https://your-subscriber-endpoint.com/api/receive"
+```sh
+curl -X POST http://localhost:5000/api/events/subscribe \
+  -H "Content-Type: application/json" \
+  -d "\"https://your-subscriber-endpoint.com/api/receive\""
 ```
 
-Replace the URL in the body with your subscriber endpoint. The service will POST event data to this URL whenever a new event occurs.
+To subscribe the built-in current state endpoint:
+
+```sh
+curl -X POST http://localhost:5000/api/events/subscribe \
+  -H "Content-Type: application/json" \
+  -d "\"http://localhost:5000/api/currentstate/receive\""
+```
 
 ---
 

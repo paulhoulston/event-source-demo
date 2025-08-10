@@ -118,5 +118,16 @@ namespace EventSourcingDemo.Controllers
             var events = _eventStore.GetAllEvents();
             return Ok(events);
         }
+
+        [HttpPost("replay")]
+        public ActionResult ReplayEvents()
+        {
+            var events = _eventStore.GetAllEvents();
+            foreach (var evt in events)
+            {
+                _subscriberService.NotifySubscribers(evt);
+            }
+            return Ok($"Replayed {events.Count()} events.");
+        }
     }
 }

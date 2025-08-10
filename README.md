@@ -121,6 +121,22 @@ curl -X POST http://localhost:5000/api/events/subscribe \
 
 ---
 
+## Replaying Events
+
+The **Replay Events** feature allows you to resend all previously stored events to all currently registered subscribers. This is useful for rebuilding the state of downstream systems or new subscribers that need to catch up with the event history.
+
+### How to Replay Events
+
+You can trigger a replay of all events using the following `curl` command:
+
+```sh
+curl -X POST http://localhost:5000/api/events/replay
+```
+
+This will send every event in the event store to all registered subscriber endpoints in the order they were originally received.
+
+---
+
 ## Event Structure
 
 Each event has the following structure:

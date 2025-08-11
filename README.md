@@ -155,3 +155,39 @@ Each event has the following structure:
 ## Summary
 
 This demo shows how event sourcing can be used to track the lifecycle of a mortgage by recording each significant event in the process. Events are grouped by `StreamId` to represent the history of each mortgage.
+
+### Full demo CURL commands
+
+```sh
+{
+   curl -X POST http://localhost:5000/api/events/subscribe \
+   -H "Content-Type: application/json" \
+   -d "\"http://localhost:5000/api/currentstate/receive\""
+
+   curl -X POST http://localhost:5000/api/events/subscribe \
+   -H "Content-Type: application/json" \
+   -d "\"http://localhost:5000/api/stats/receive\""
+
+   curl -X POST http://localhost:5000/api/events/apply \
+   -H "Content-Type: application/json" \
+   -d "\"paul-1\""
+
+   curl -X POST http://localhost:5000/api/events/apply \
+   -H "Content-Type: application/json" \
+   -d "\"jamie\""
+   
+
+   curl -X POST http://localhost:5000/api/events/decide \
+   -H "Content-Type: application/json" \
+   -d "\"paul-1\""
+
+   curl -X POST http://localhost:5000/api/events/complete \
+   -H "Content-Type: application/json" \
+   -d "\"paul-1\""
+
+   curl http://localhost:5000/api/events
+   curl http://localhost:5000/api/currentstate
+   curl http://localhost:5000/api/stats/not-completed
+
+}
+```
